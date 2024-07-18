@@ -11,7 +11,7 @@ API_ID = os.environ.get("API_ID", "20571368")
 
 API_HASH = os.environ.get("API_HASH", "c874d957737d24e17159005874a2d5bf")
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "7244643300:AAGhqOkUYovRdb0PF-_6Wqj4B0sGillvyPg") 
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "7272469041:AAE-Jn1Z2xj0GzFr6CuujLv6YmWkjE8qG-E") 
 
 FORCE_SUB = os.environ.get("FORCE_SUB", "ARA_HANIME_WORLD") 
 
