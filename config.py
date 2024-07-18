@@ -21,7 +21,7 @@ FORCE_SUB = os.environ.get("FORCE_SUB", "ARA_HANIME_WORLD")
 
 DB_NAME = os.environ.get("DB_NAME", "ARA_RENAME")     
 
-DB_URL = os.environ.get("DB_URL", "7244643300:AAGhqOkUYovRdb0PF-_6Wqj4B0sGillvyPg")
+DB_URL = os.environ.get("DB_URL", "mongodb+srv://ariyansarkar670:rn9eARu7Kuig5UKp@cluster0.gldqteo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
  
 FLOOD = int(os.environ.get("FLOOD", "10"))
 
