@@ -4,11 +4,13 @@
 
 import logging
 import logging.config
-import asyncio  # Add this import
-from pyrogram import Client 
+import asyncio
+from pyrogram import Client
 from config import API_ID, API_HASH, BOT_TOKEN, FORCE_SUB, PORT
 from aiohttp import web
 from plugins.web_support import web_server
+import ntplib
+import time
 
 logging.config.fileConfig('logging.conf')
 logging.getLogger().setLevel(logging.INFO)
@@ -28,8 +30,23 @@ class Bot(Client):
         )
 
     async def start(self):
-        # Synchronize time by delaying the start
-        await asyncio.sleep(5)  # Delay for 5 seconds
+        # Synchronize system time using ntplib
+        try:
+            c = ntplib.NTPClient()
+            response = c.request('pool.ntp.org')
+            current_time = response.tx_time
+            time_offset = response.offset
+            print(f"NTP time: {current_time}, Offset: {time_offset}")
+
+            # Synchronize the system time if you have the necessary permissions
+            # Note: Setting system time typically requires administrative privileges
+            if time_offset > 0.1:  # Adjust this threshold as needed
+                await asyncio.sleep(time_offset)
+
+        except Exception as e:
+            logging.warning(f"Failed to synchronize time: {e}")
+
+        await asyncio.sleep(5)  # Delay for 5 seconds for additional buffer
         await super().start()
         me = await self.get_me()
         self.mention = me.mention
@@ -37,20 +54,20 @@ class Bot(Client):
         self.force_channel = FORCE_SUB
         if FORCE_SUB:
             try:
-                link = await self.export_chat_invite_link(FORCE_SUB)                  
+                link = await self.export_chat_invite_link(FORCE_SUB)
                 self.invitelink = link
             except Exception as e:
                 logging.warning(e)
-                logging.warning("Make Sure Bot admin in force sub channel")             
+                logging.warning("Make Sure Bot admin in force sub channel")
                 self.force_channel = None
         app = web.AppRunner(await web_server())
         await app.setup()
         bind_address = "0.0.0.0"
         await web.TCPSite(app, bind_address, PORT).start()
         logging.info(f"{me.first_name} ✅✅ BOT started successfully ✅✅")
-      
+
     async def stop(self, *args):
-        await super().stop()      
+        await super().stop()
         logging.info("Bot Stopped 🙄")
 
 bot = Bot()
