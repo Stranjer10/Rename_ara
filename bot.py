@@ -29,24 +29,34 @@ class Bot(Client):
             sleep_threshold=5,
         )
 
+    async def synchronize_time(self):
+        for _ in range(5):  # Try up to 5 times
+            try:
+                c = ntplib.NTPClient()
+                response = c.request('pool.ntp.org')
+                current_time = response.tx_time
+                time_offset = response.offset
+                print(f"NTP time: {current_time}, Offset: {time_offset}")
+
+                if abs(time_offset) < 0.1:  # Adjust this threshold as needed
+                    print("Time is synchronized")
+                    return True
+                else:
+                    print("Time offset is too large, waiting to retry...")
+                    await asyncio.sleep(5)  # Wait before retrying
+            except Exception as e:
+                logging.warning(f"Failed to synchronize time: {e}")
+                await asyncio.sleep(5)  # Wait before retrying
+
+        print("Failed to synchronize time after multiple attempts")
+        return False
+
     async def start(self):
-        # Synchronize system time using ntplib
-        try:
-            c = ntplib.NTPClient()
-            response = c.request('pool.ntp.org')
-            current_time = response.tx_time
-            time_offset = response.offset
-            print(f"NTP time: {current_time}, Offset: {time_offset}")
-
-            # Synchronize the system time if you have the necessary permissions
-            # Note: Setting system time typically requires administrative privileges
-            if time_offset > 0.1:  # Adjust this threshold as needed
-                await asyncio.sleep(time_offset)
-
-        except Exception as e:
-            logging.warning(f"Failed to synchronize time: {e}")
-
-        await asyncio.sleep(5)  # Delay for 5 seconds for additional buffer
+        time_synced = await self.synchronize_time()
+        if not time_synced:
+            print("Proceeding without proper time synchronization")
+        
+        await asyncio.sleep(5)  # Delay for additional buffer
         await super().start()
         me = await self.get_me()
         self.mention = me.mention
